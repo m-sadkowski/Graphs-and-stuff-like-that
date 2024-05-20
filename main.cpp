@@ -127,6 +127,7 @@ void degreeSequence(MyVector* graph, int numberOfNodes) {
         degree[i] = graph[i].getSize();
     }
     quickSort(degree, numberOfNodes);
+    printf("\n");
     for (int i = numberOfNodes - 1; i >= 0; i--) {
         printf("%d ", degree[i]);
     }
@@ -158,11 +159,10 @@ void numberOfComponents(MyVector* graph, int numberOfNodes) {
             components++;
         }
     }
-    printf("%d", components);
+    printf("\n%d", components);
     delete[] visited;
     return;
 }
-
 
 //dwudzielnoœæ grafu
 // (true/false)
@@ -212,9 +212,13 @@ void c4Subgraphs(MyVector* graph, int numberOfNodes) {
 // liczba krawêdzi dope³nienia grafu
 // (liczba)
 void complementsEdges(MyVector* graph, int numberOfNodes) {
-    printf("\n?");
+    int edges = 0;
+    for (int i = 0; i < numberOfNodes; i++) {
+        edges += graph[i].getSize();
+    }
+    printf("\n%d", (numberOfNodes * (numberOfNodes - 1) / 2) - (edges / 2));
+    return;
 }
-
 
 void inputGraph() {
     int numberOfNodes = 0;
@@ -245,34 +249,24 @@ void inputGraph() {
     }
     */
 
-    printf("\n");
     degreeSequence(graph, numberOfNodes);
 
-    printf("\n");
     numberOfComponents(graph, numberOfNodes);
 
-    printf("\n");
     bipartiteness(graph, numberOfNodes);
 
-    printf("\n");
     eccentricityOfVertices(graph, numberOfNodes);
 
-    printf("\n");
     planarity(graph, numberOfNodes);
 
-    printf("\n");
     verticesColoursGreedy(graph, numberOfNodes);
 
-    printf("\n");
     verticesColoursLF(graph, numberOfNodes);
 
-    printf("\n");
     verticesColoursSLF(graph, numberOfNodes);
 
-    printf("\n");
     c4Subgraphs(graph, numberOfNodes);
 
-    printf("\n");
     complementsEdges(graph, numberOfNodes);
 
     printf("\n\n");
@@ -287,5 +281,6 @@ int main() {
     for (int i = 0; i < numberOfGraphs; i++) {
         inputGraph();
     }
+
     return 0;
 }
