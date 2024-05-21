@@ -121,7 +121,7 @@ void quickSort(int* tab, int size) {
 
 //ci¹gu stopniowy 
 // (ci¹g n liczb)
-void degreeSequence(MyVector* graph, int numberOfNodes) {
+void degreeSequence(MyVector* graph, long long numberOfNodes) {
     int* degree = new int[numberOfNodes];
     for (int i = 0; i < numberOfNodes; i++) {
         degree[i] = graph[i].getSize();
@@ -137,7 +137,7 @@ void degreeSequence(MyVector* graph, int numberOfNodes) {
 
 //liczba sk³adowych spójnoœci
 // (liczba)
-bool DFS(MyVector* graph, int node, int* visited, int numberOfNodes) {
+bool DFS(MyVector* graph, int node, int* visited, long long numberOfNodes) {
     visited[node] = 1;
     for (int i = 0; i < graph[node].getSize(); i++) {
         if (visited[graph[node].get(i) - 1] == 0) {
@@ -147,7 +147,7 @@ bool DFS(MyVector* graph, int node, int* visited, int numberOfNodes) {
     return true;
 }
 
-void numberOfComponents(MyVector* graph, int numberOfNodes) {
+void numberOfComponents(MyVector* graph, long long numberOfNodes) {
     int* visited = new int[numberOfNodes];
     for (int i = 0; i < numberOfNodes; i++) {
         visited[i] = 0;
@@ -166,32 +166,32 @@ void numberOfComponents(MyVector* graph, int numberOfNodes) {
 
 //dwudzielnoœæ grafu
 // (true/false)
-void bipartiteness(MyVector* graph, int numberOfNodes) {
+void bipartiteness(MyVector* graph, long long numberOfNodes) {
     printf("\n?");
 }
 
 //acentrycznoœci  wierzcho³ków (w ramach sk³adowych spójnoœci)
 // (ci¹g n liczb)
-void eccentricityOfVertices(MyVector* graph, int numberOfNodes) {
+void eccentricityOfVertices(MyVector* graph, long long numberOfNodes) {
     printf("\n?");
 }
 
 //planarnoœæ grafu (true/false)
-void planarity(MyVector* graph, int numberOfNodes) {
+void planarity(MyVector* graph, long long numberOfNodes) {
     printf("\n?");
 }
 
 // kolorowanie wierzcho³ków grafu algorytmem zach³annym
 // w kolejnoœci wierzcho³ków zgodnej z numerem wierzcho³ka
 // (ci¹g n liczb)
-void verticesColoursGreedy(MyVector* graph, int numberOfNodes) {
+void verticesColoursGreedy(MyVector* graph, long long numberOfNodes) {
     printf("\n?");
 }
 
 // kolorowanie wierzcho³ków grafu algorytmem LF
 // (remisy rozwi¹zujemy przy pomocy numeru wierzcho³ka)
 // (ci¹g n liczb)
-void verticesColoursLF(MyVector* graph, int numberOfNodes) {
+void verticesColoursLF(MyVector* graph, long long numberOfNodes) {
     printf("\n?");
 }
 
@@ -199,30 +199,31 @@ void verticesColoursLF(MyVector* graph, int numberOfNodes) {
 // (w przypadku remisu wybierz wierzcho³ek z najwy¿szym stopniem,
 // a jeœli nadal jest remis to wierzcho³ek o najmniejszym indeksie)
 // (ci¹g n liczb)
-void verticesColoursSLF(MyVector* graph, int numberOfNodes) {
+void verticesColoursSLF(MyVector* graph, long long numberOfNodes) {
     printf("\n?");
 }
 
 // liczba ró¿nych podgrafów C4
 // (liczba)
-void c4Subgraphs(MyVector* graph, int numberOfNodes) {
+void c4Subgraphs(MyVector* graph, long long numberOfNodes) {
     printf("\n?");
 }
 
 // liczba krawêdzi dope³nienia grafu
 // (liczba)
-void complementsEdges(MyVector* graph, int numberOfNodes) {
-    int edges = 0;
+void complementsEdges(MyVector* graph, long long numberOfNodes) {
+    long long edges = 0;
     for (int i = 0; i < numberOfNodes; i++) {
-        edges += graph[i].getSize();
+        edges += long long(graph[i].getSize());
     }
-    printf("\n%d", (numberOfNodes * (numberOfNodes - 1) / 2) - (edges / 2));
+    long long complementEdges = (numberOfNodes * (numberOfNodes - 1) / 2) - (edges / 2);
+    printf("\n%lld", complementEdges);
     return;
 }
 
 void inputGraph() {
-    int numberOfNodes = 0;
-    scanf("%d", &numberOfNodes);
+    long long numberOfNodes = 0;
+    scanf("%lld", &numberOfNodes);
 
     int numberOfNeighbours = 0;
     int neighbour = 0;
