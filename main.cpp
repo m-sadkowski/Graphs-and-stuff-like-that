@@ -4,25 +4,27 @@
 
 using namespace std;
 
-class MyVector {
+// tablica dynamiczna
+class Vector {
     int* tab;
     int capacity;
 
 public:
     int size;
-    MyVector() {
+
+    Vector() {
         size = 0;
         tab = new int[1];
         capacity = 1;
     }
 
-    explicit MyVector(int size) {
+    explicit Vector(int size) {
         this->size = size;
         tab = new int[size];
         capacity = size;
     }
 
-    MyVector(const MyVector& other) {
+    Vector(const Vector& other) {
         size = other.size;
         capacity = other.capacity;
         tab = new int[capacity];
@@ -31,11 +33,11 @@ public:
         }
     }
 
-    ~MyVector() {
+    ~Vector() {
         delete[] tab;
     }
 
-    MyVector& operator=(const MyVector& other) {
+    Vector& operator=(const Vector& other) {
         if (this == &other) {
             return *this;
         }
@@ -52,21 +54,11 @@ public:
         return *this;
     }
 
-    void set(int index, int value) {
-        if (index >= 0 && index < size) {
-            tab[index] = value;
-        }
-    }
-
     int get(int index) const {
         if (index >= 0 && index < size) {
             return tab[index];
         }
         return 0;
-    }
-
-    int getSize() const {
-        return size;
     }
 
     void push_back(int value) {
@@ -83,13 +75,69 @@ public:
         tab[size] = value;
         size++;
     }
+};
 
-    int& operator[](int index) {
-        if (index >= 0 && index < size) {
-            return tab[index];
-        }
-        return tab[0];
+// kolejka FIFO
+class Stack {
+    Vector vec;
+
+public:
+    Stack() : vec() {}
+
+    void push(int value) {
+        vec.push_back(value);
     }
+
+    void pop() {
+        if (!isEmpty()) {
+            vec.size--;
+        }
+    }
+
+    int top() const {
+        if (!isEmpty()) {
+            return vec.get(vec.size - 1);
+        }
+        return 0;
+    }
+
+    bool isEmpty() const {
+        return vec.size == 0;
+    }
+};
+
+// stos LIFO
+class Queue {
+    Vector vec;
+    int frontElement;
+
+public:
+    Queue() : frontElement(0) {}
+
+    void push(int value) {
+        vec.push_back(value);
+    }
+
+    void pop() {
+        if (!isEmpty()) {
+            frontElement++;
+        }
+    }
+
+    int front() const {
+        if (!isEmpty()) {
+            return vec.get(frontElement);
+        }
+        return 0;
+    }
+
+    bool isEmpty() const {
+        return frontElement >= vec.size;
+    }
+
+    int size() const {
+		return vec.size - frontElement;
+	}
 };
 
 void quickSort(int* tab, int size) {
@@ -121,10 +169,10 @@ void quickSort(int* tab, int size) {
 
 //ci¹gu stopniowy 
 // (ci¹g n liczb)
-void degreeSequence(MyVector* graph, long long numberOfNodes) {
+void degreeSequence(Vector* graph, int numberOfNodes) {
     int* degree = new int[numberOfNodes];
     for (int i = 0; i < numberOfNodes; i++) {
-        degree[i] = graph[i].getSize();
+        degree[i] = graph[i].size;
     }
     quickSort(degree, numberOfNodes);
     printf("\n");
@@ -137,61 +185,114 @@ void degreeSequence(MyVector* graph, long long numberOfNodes) {
 
 //liczba sk³adowych spójnoœci
 // (liczba)
-bool DFS(MyVector* graph, int node, int* visited, long long numberOfNodes) {
-    visited[node] = 1;
-    for (int i = 0; i < graph[node].getSize(); i++) {
-        if (visited[graph[node].get(i) - 1] == 0) {
-            DFS(graph, graph[node].get(i) - 1, visited, numberOfNodes);
+void DFS(Vector* graph, int startNode, int* visited) {
+    Stack stack;
+    stack.push(startNode);
+
+    while (!stack.isEmpty()) {
+        int node = stack.top();
+        stack.pop();
+        if (!visited[node]) {
+            visited[node] = 1;
+            for (int i = graph[node].size - 1; i >= 0; i--) {
+                int neighbour = graph[node].get(i) - 1;
+                if (!visited[neighbour]) {
+                    stack.push(neighbour);
+                }
+            }
         }
     }
-    return true;
+
+    return;
 }
 
-void numberOfComponents(MyVector* graph, long long numberOfNodes) {
+bool numberOfComponents(Vector* graph, int numberOfNodes) {
     int* visited = new int[numberOfNodes];
-    for (int i = 0; i < numberOfNodes; i++) {
-        visited[i] = 0;
-    }
+	for (int i = 0; i < numberOfNodes; i++) {
+		visited[i] = 0;
+	}
     int components = 0;
     for (int i = 0; i < numberOfNodes; i++) {
         if (visited[i] == 0) {
-            DFS(graph, i, visited, numberOfNodes);
+            DFS(graph, i, visited);
             components++;
         }
     }
     printf("\n%d", components);
     delete[] visited;
-    return;
+    if (components == 1) {
+		return true;
+	}
+    return false;
 }
 
 //dwudzielnoœæ grafu
 // (true/false)
-void bipartiteness(MyVector* graph, long long numberOfNodes) {
-    printf("\n?");
+void bipartiteness(Vector* graph, int numberOfNodes) {
+    int* colours = new int[numberOfNodes];
+	for (int i = 0; i < numberOfNodes; i++) {
+		colours[i] = 0;
+	}
+
+    Queue queue;
+
+    for (int i = 0; i < numberOfNodes; i++) {
+        if (colours[i] == 0) {
+			colours[i] = 1;
+			queue.push(i);
+            while (!queue.isEmpty()) {
+                int node = queue.front();
+                queue.pop();
+                for (int j = 0; j < graph[node].size; j++) {
+                    int neighbour = graph[node].get(j) - 1;
+                    if (colours[neighbour] == 0) {
+                        if (colours[node] == 1) {
+                            colours[neighbour] = 2;
+                        }
+                        else {
+                            colours[neighbour] = 1;
+                        }
+                        queue.push(neighbour);
+                    }
+                    else if (colours[neighbour] == colours[node]) {
+                        printf("\nF");
+                        delete[] colours;
+                        return;
+                    }
+                }
+             }
+         }
+     }
+
+    
+
+    printf("\nT");
+    delete[] colours;
+    return;
 }
 
 //acentrycznoœci  wierzcho³ków (w ramach sk³adowych spójnoœci)
 // (ci¹g n liczb)
-void eccentricityOfVertices(MyVector* graph, long long numberOfNodes) {
+void eccentricityOfVertices(Vector* graph, int numberOfNodes) {
     printf("\n?");
 }
 
 //planarnoœæ grafu (true/false)
-void planarity(MyVector* graph, long long numberOfNodes) {
+void planarity(Vector* graph, int numberOfNodes) {
     printf("\n?");
 }
 
 // kolorowanie wierzcho³ków grafu algorytmem zach³annym
 // w kolejnoœci wierzcho³ków zgodnej z numerem wierzcho³ka
 // (ci¹g n liczb)
-void verticesColoursGreedy(MyVector* graph, long long numberOfNodes) {
+void verticesColoursGreedy(Vector* graph, int numberOfNodes) {
     printf("\n?");
 }
 
 // kolorowanie wierzcho³ków grafu algorytmem LF
 // (remisy rozwi¹zujemy przy pomocy numeru wierzcho³ka)
 // (ci¹g n liczb)
-void verticesColoursLF(MyVector* graph, long long numberOfNodes) {
+void verticesColoursLF(Vector* graph, int numberOfNodes) {
     printf("\n?");
 }
 
@@ -199,40 +300,41 @@ void verticesColoursLF(MyVector* graph, long long numberOfNodes) {
 // (w przypadku remisu wybierz wierzcho³ek z najwy¿szym stopniem,
 // a jeœli nadal jest remis to wierzcho³ek o najmniejszym indeksie)
 // (ci¹g n liczb)
-void verticesColoursSLF(MyVector* graph, long long numberOfNodes) {
+void verticesColoursSLF(Vector* graph, int numberOfNodes) {
     printf("\n?");
 }
 
 // liczba ró¿nych podgrafów C4
 // (liczba)
-void c4Subgraphs(MyVector* graph, long long numberOfNodes) {
+void c4Subgraphs(Vector* graph, int numberOfNodes) {
     printf("\n?");
 }
 
 // liczba krawêdzi dope³nienia grafu
 // (liczba)
-void complementsEdges(MyVector* graph, long long numberOfNodes) {
+void complementsEdges(Vector* graph, int numberOfNodes) {
     long long edges = 0;
-    for (int i = 0; i < numberOfNodes; i++) {
-        edges += long long(graph[i].getSize());
+    long long nodes = long long(numberOfNodes);
+    for (long long i = 0; i < nodes; i++) {
+        edges += graph[i].size;
     }
-    long long complementEdges = (numberOfNodes * (numberOfNodes - 1) / 2) - (edges / 2);
+    long long complementEdges = (nodes * (nodes - 1) / 2) - (edges / 2);
     printf("\n%lld", complementEdges);
     return;
 }
 
 void inputGraph() {
-    long long numberOfNodes = 0;
-    scanf("%lld", &numberOfNodes);
+    int numberOfNodes = 0;
+    scanf("%d", &numberOfNodes);
 
     int numberOfNeighbours = 0;
     int neighbour = 0;
 
-    MyVector* graph = new MyVector[numberOfNodes];
+    Vector* graph = new Vector[numberOfNodes];
 
     for (int i = 0; i < numberOfNodes; i++) {
         scanf("%d", &numberOfNeighbours);
-        MyVector neighbours;
+        Vector neighbours;
         for (int j = 0; j < numberOfNeighbours; j++) {
             scanf("%d", &neighbour);
             neighbours.push_back(neighbour);
@@ -243,7 +345,7 @@ void inputGraph() {
     /*
     printf("\n");
     for (int i = 0; i < numberOfNodes; i++) {
-        for (int j = 0; j < graph[i].getSize(); j++) {
+        for (int j = 0; j < graph[i].size(); j++) {
             printf("%d ", graph[i].get(j));
         }
         printf("\n");
