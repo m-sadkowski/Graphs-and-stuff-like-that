@@ -180,7 +180,6 @@ void degreeSequence(Vector* graph, int numberOfNodes) {
         printf("%d ", degree[i]);
     }
     delete[] degree;
-    return;
 }
 
 //liczba sk³adowych spójnoœci
@@ -188,7 +187,7 @@ void degreeSequence(Vector* graph, int numberOfNodes) {
 void DFS(Vector* graph, int startNode, int* visited) {
     Stack stack;
     stack.push(startNode);
-
+    
     while (!stack.isEmpty()) {
         int node = stack.top();
         stack.pop();
@@ -206,11 +205,13 @@ void DFS(Vector* graph, int startNode, int* visited) {
     return;
 }
 
-bool numberOfComponents(Vector* graph, int numberOfNodes) {
+void numberOfComponents(Vector* graph, int numberOfNodes) {
     int* visited = new int[numberOfNodes];
 	for (int i = 0; i < numberOfNodes; i++) {
 		visited[i] = 0;
 	}
+
+	// zliczanie sk³adowych spójnoœci grafu za pomoc¹ algorytmu DFS
     int components = 0;
     for (int i = 0; i < numberOfNodes; i++) {
         if (visited[i] == 0) {
@@ -220,10 +221,6 @@ bool numberOfComponents(Vector* graph, int numberOfNodes) {
     }
     printf("\n%d", components);
     delete[] visited;
-    if (components == 1) {
-		return true;
-	}
-    return false;
 }
 
 //dwudzielnoœæ grafu
@@ -233,9 +230,9 @@ void bipartiteness(Vector* graph, int numberOfNodes) {
 	for (int i = 0; i < numberOfNodes; i++) {
 		colours[i] = 0;
 	}
-
     Queue queue;
 
+	// nadawanie kolorów na przemian do momentu próby nadania koloru wierzcho³kowi, który ma ju¿ nadany inny kolor
     for (int i = 0; i < numberOfNodes; i++) {
         if (colours[i] == 0) {
 			colours[i] = 1;
@@ -264,11 +261,8 @@ void bipartiteness(Vector* graph, int numberOfNodes) {
          }
      }
 
-    
-
     printf("\nT");
     delete[] colours;
-    return;
 }
 
 //acentrycznoœci  wierzcho³ków (w ramach sk³adowych spójnoœci)
@@ -286,14 +280,147 @@ void planarity(Vector* graph, int numberOfNodes) {
 // w kolejnoœci wierzcho³ków zgodnej z numerem wierzcho³ka
 // (ci¹g n liczb)
 void verticesColoursGreedy(Vector* graph, int numberOfNodes) {
-    printf("\n?");
+    int* colours = new int[numberOfNodes];
+    for (int i = 0; i < numberOfNodes; i++) {
+        colours[i] = 0;
+    }
+    
+	// kolorowanie wierzcho³ków grafu w kolejnoœci inputu przypisuj¹c najmniejszy mo¿liwy kolor
+    for (int i = 0; i < numberOfNodes; i++) {
+        if (colours[i] == 0) {
+            int smallest = 1;
+            while (true) {
+                bool colorAvailable = true;
+                for (int j = 0; j < graph[i].size; j++) {
+                    if (colours[graph[i].get(j) - 1] == smallest) {
+                        colorAvailable = false;
+                        break;
+                    }
+                }
+                if (colorAvailable) {
+                    colours[i] = smallest;
+                    break;
+                }
+                smallest++;
+            }
+        }
+    }
+
+    printf("\n");
+    for (int i = 0; i < numberOfNodes; i++) {
+        printf("%d ", colours[i]);
+    }
+    delete[] colours;
 }
 
 // kolorowanie wierzcho³ków grafu algorytmem LF
 // (remisy rozwi¹zujemy przy pomocy numeru wierzcho³ka)
 // (ci¹g n liczb)
+void merge(int** tab, int left, int middle, int right) {
+    // tworzenie tablic pomocniczych
+    int leftSize = middle - left + 1;
+    int rightSize = right - middle;
+    int** leftTab = new int* [leftSize];
+    int** rightTab = new int* [rightSize];
+
+	// kopiowanie elementów do tablic pomocniczych
+    for (int i = 0; i < leftSize; i++) {
+        leftTab[i] = tab[left + i];
+    }
+    for (int i = 0; i < rightSize; i++) {
+        rightTab[i] = tab[middle + 1 + i];
+    }
+
+    int i = 0;
+    int j = 0;
+    int k = left;
+
+	// porównywanie elementów tablic pomocniczych i przypisywanie ich do tablicy g³ównej
+    while (i < leftSize && j < rightSize) {
+        if (leftTab[i][1] >= rightTab[j][1]) {
+            tab[k] = leftTab[i];
+            i++;
+        }
+        else {
+            tab[k] = rightTab[j];
+            j++;
+        }
+        k++;
+    }
+
+	// przepisanie pozosta³ych elementów z tablic pomocniczych
+    while (i < leftSize) {
+        tab[k] = leftTab[i];
+        i++;
+        k++;
+    }
+    while (j < rightSize) {
+        tab[k] = rightTab[j];
+        j++;
+        k++;
+    }
+
+	// zwalnianie pamiêci
+    delete[] leftTab;
+    delete[] rightTab;
+}
+
+void mergeSort(int** tab, int left, int right) {
+    if (left < right) {
+        int middle = left + (right - left) / 2;
+        mergeSort(tab, left, middle);
+        mergeSort(tab, middle + 1, right);
+        merge(tab, left, middle, right);
+    }
+}
+
 void verticesColoursLF(Vector* graph, int numberOfNodes) {
-    printf("\n?");
+	int** indexAndDegree = new int* [numberOfNodes];
+	for (int i = 0; i < numberOfNodes; i++) {
+		indexAndDegree[i] = new int[2];
+		indexAndDegree[i][0] = i;
+		indexAndDegree[i][1] = graph[i].size;
+	}
+
+	// sortowanie tablicy indexAndDegree w kolejnoœci malej¹cej przy pomocy merge sort
+	mergeSort(indexAndDegree, 0, numberOfNodes - 1);
+	
+    int* colours = new int[numberOfNodes];
+    for (int i = 0; i < numberOfNodes; i++) {
+        colours[i] = 0;
+    }
+
+	// kolorowanie wierzcho³ków grafu posortowanego wed³ug stopni wierzcho³ków przypisuj¹c najmniejszy mo¿liwy kolor
+    for (int i = 0; i < numberOfNodes; i++) {
+        int x = indexAndDegree[i][0];
+        if (colours[x] == 0) {
+            int smallest = 1;
+            while (true) {
+                bool colorAvailable = true;
+                for (int j = 0; j < graph[x].size; j++) {
+                    if (colours[graph[x].get(j) - 1] == smallest) {
+                        colorAvailable = false;
+                        break;
+                    }
+                }
+                if (colorAvailable) {
+                    colours[x] = smallest;
+                    break;
+                }
+                smallest++;
+            }
+        }
+    }
+
+    printf("\n");
+    for (int i = 0; i < numberOfNodes; i++) {
+        printf("%d ", colours[i]);
+    }
+    delete[] colours;
+    for (int i = 0; i < numberOfNodes; i++) {
+        delete[] indexAndDegree[i];
+    }
+    delete[] indexAndDegree;
 }
 
 // kolorowanie wierzcho³ków grafu algorytmem SLF
@@ -320,7 +447,6 @@ void complementsEdges(Vector* graph, int numberOfNodes) {
     }
     long long complementEdges = (nodes * (nodes - 1) / 2) - (edges / 2);
     printf("\n%lld", complementEdges);
-    return;
 }
 
 void inputGraph() {
@@ -341,16 +467,6 @@ void inputGraph() {
         }
         graph[i] = neighbours;
     }
-
-    /*
-    printf("\n");
-    for (int i = 0; i < numberOfNodes; i++) {
-        for (int j = 0; j < graph[i].size(); j++) {
-            printf("%d ", graph[i].get(j));
-        }
-        printf("\n");
-    }
-    */
 
     degreeSequence(graph, numberOfNodes);
 
