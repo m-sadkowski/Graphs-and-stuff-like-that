@@ -4,7 +4,7 @@
 
 using namespace std;
 
-// tablica dynamiczna
+// vector
 class Vector {
     int* tab;
     int capacity;
@@ -18,10 +18,10 @@ public:
         capacity = 1;
     }
 
-    explicit Vector(int size) {
-        this->size = size;
-        tab = new int[size];
-        capacity = size;
+    Vector(int capacity) {
+        size = 0;
+        tab = new int[capacity + 1];
+        this->capacity = capacity;
     }
 
     Vector(const Vector& other) {
@@ -77,7 +77,7 @@ public:
     }
 };
 
-// kolejka FIFO
+// stos (LIFO)
 class Stack {
     Vector vec;
 
@@ -106,7 +106,7 @@ public:
     }
 };
 
-// stos LIFO
+// kolejka (FIFO)
 class Queue {
     Vector vec;
     int frontElement;
@@ -136,8 +136,8 @@ public:
     }
 
     int size() const {
-		return vec.size - frontElement;
-	}
+        return vec.size - frontElement;
+    }
 };
 
 void quickSort(int* tab, int size) {
@@ -167,14 +167,14 @@ void quickSort(int* tab, int size) {
     quickSort(tab + i, size - i);
 }
 
-//ci¹gu stopniowy 
+// ci¹gu stopniowy 
 // (ci¹g n liczb)
 void degreeSequence(Vector* graph, int numberOfNodes) {
     int* degree = new int[numberOfNodes];
     for (int i = 0; i < numberOfNodes; i++) {
         degree[i] = graph[i].size;
     }
-    quickSort(degree, numberOfNodes);
+	quickSort(degree, numberOfNodes);
     printf("\n");
     for (int i = numberOfNodes - 1; i >= 0; i--) {
         printf("%d ", degree[i]);
@@ -182,12 +182,12 @@ void degreeSequence(Vector* graph, int numberOfNodes) {
     delete[] degree;
 }
 
-//liczba sk³adowych spójnoœci
+// liczba sk³adowych spójnoœci
 // (liczba)
 void DFS(Vector* graph, int startNode, int* visited) {
     Stack stack;
     stack.push(startNode);
-    
+
     while (!stack.isEmpty()) {
         int node = stack.top();
         stack.pop();
@@ -207,11 +207,11 @@ void DFS(Vector* graph, int startNode, int* visited) {
 
 void numberOfComponents(Vector* graph, int numberOfNodes) {
     int* visited = new int[numberOfNodes];
-	for (int i = 0; i < numberOfNodes; i++) {
-		visited[i] = 0;
-	}
+    for (int i = 0; i < numberOfNodes; i++) {
+        visited[i] = 0;
+    }
 
-	// zliczanie sk³adowych spójnoœci grafu za pomoc¹ algorytmu DFS
+    // zliczanie sk³adowych spójnoœci grafu przez DFS
     int components = 0;
     for (int i = 0; i < numberOfNodes; i++) {
         if (visited[i] == 0) {
@@ -223,25 +223,27 @@ void numberOfComponents(Vector* graph, int numberOfNodes) {
     delete[] visited;
 }
 
-//dwudzielnoœæ grafu
+// dwudzielnoœæ grafu
 // (true/false)
 void bipartiteness(Vector* graph, int numberOfNodes) {
     int* colours = new int[numberOfNodes];
-	for (int i = 0; i < numberOfNodes; i++) {
-		colours[i] = 0;
-	}
+    for (int i = 0; i < numberOfNodes; i++) {
+        colours[i] = 0;
+    }
     Queue queue;
 
-	// nadawanie kolorów na przemian do momentu próby nadania koloru wierzcho³kowi, który ma ju¿ nadany inny kolor
+    // nadawanie kolorów na przemian do momentu próby nadania koloru wierzcho³kowi, który ma ju¿ nadany inny kolor
     for (int i = 0; i < numberOfNodes; i++) {
         if (colours[i] == 0) {
-			colours[i] = 1;
-			queue.push(i);
+            colours[i] = 1;
+            queue.push(i);
+            // BFS
             while (!queue.isEmpty()) {
                 int node = queue.front();
                 queue.pop();
                 for (int j = 0; j < graph[node].size; j++) {
                     int neighbour = graph[node].get(j) - 1;
+                    // nadanie koloru wierzcho³kom na przemian
                     if (colours[neighbour] == 0) {
                         if (colours[node] == 1) {
                             colours[neighbour] = 2;
@@ -257,18 +259,59 @@ void bipartiteness(Vector* graph, int numberOfNodes) {
                         return;
                     }
                 }
-             }
-         }
-     }
+            }
+        }
+    }
 
     printf("\nT");
     delete[] colours;
 }
 
-//acentrycznoœci  wierzcho³ków (w ramach sk³adowych spójnoœci)
+// acentrycznoœci  wierzcho³ków (w ramach sk³adowych spójnoœci)
 // (ci¹g n liczb)
 void eccentricityOfVertices(Vector* graph, int numberOfNodes) {
-    printf("\n?");
+    printf("\n");
+    // ¿aden wierzcho³ek nie jest odwiedzony
+    int* visited = new int[numberOfNodes];
+    for (int i = 0; i < numberOfNodes; i++) {
+        visited[i] = -1;
+    }
+    for (int i = 0; i < numberOfNodes; i++) {
+        // BFS
+        Queue queue;
+        queue.push(i);
+        visited[i] = i;
+        int distance = 0;
+        int pushed = 1;
+        while (!queue.isEmpty()) {
+            // pobieramy wierzcho³ek z kolejki i sprawdzamy jego s¹siadów
+            int size = queue.size();
+            for (int j = 0; j < size; j++) {
+                int v = queue.front();
+                queue.pop();
+                // jeœli s¹siedzi nie s¹ odwiedzeni to dodajemy do kolejki
+                for (int k = 0; k < graph[v].size; k++) {
+                    int neighbour = graph[v].get(k) - 1;
+                    if (visited[neighbour] != i) {
+                        ++pushed;
+                        // jeœli iloœæ dodanych wierzcho³ków jest równa iloœci wierzcho³ków w grafie to przerywamy BFS
+                        if (pushed == numberOfNodes) break;
+                        queue.push(neighbour);
+                        visited[neighbour] = i;
+                    }
+                }
+                if (pushed == numberOfNodes) break;
+            }
+            ++distance;
+            if (pushed == numberOfNodes) {
+                // zwiêkszamy odleg³oœæ o 1, bo je¿eli tu dojdzie to ostatni wierzcho³ek nie ma s¹siadów
+                ++distance;
+                break;
+            }
+        }
+        printf("%d ", distance - 1);
+    }
+    delete[] visited;
 }
 
 //planarnoœæ grafu (true/false)
@@ -284,8 +327,8 @@ void verticesColoursGreedy(Vector* graph, int numberOfNodes) {
     for (int i = 0; i < numberOfNodes; i++) {
         colours[i] = 0;
     }
-    
-	// kolorowanie wierzcho³ków grafu w kolejnoœci inputu przypisuj¹c najmniejszy mo¿liwy kolor
+
+    // kolorowanie wierzcho³ków grafu w kolejnoœci inputu przypisuj¹c najmniejszy mo¿liwy kolor
     for (int i = 0; i < numberOfNodes; i++) {
         if (colours[i] == 0) {
             int smallest = 1;
@@ -323,7 +366,7 @@ void merge(int** tab, int left, int middle, int right) {
     int** leftTab = new int* [leftSize];
     int** rightTab = new int* [rightSize];
 
-	// kopiowanie elementów do tablic pomocniczych
+    // kopiowanie elementów do tablic pomocniczych
     for (int i = 0; i < leftSize; i++) {
         leftTab[i] = tab[left + i];
     }
@@ -335,7 +378,7 @@ void merge(int** tab, int left, int middle, int right) {
     int j = 0;
     int k = left;
 
-	// porównywanie elementów tablic pomocniczych i przypisywanie ich do tablicy g³ównej
+    // porównywanie elementów tablic pomocniczych i przypisywanie ich do tablicy g³ównej
     while (i < leftSize && j < rightSize) {
         if (leftTab[i][1] >= rightTab[j][1]) {
             tab[k] = leftTab[i];
@@ -348,7 +391,7 @@ void merge(int** tab, int left, int middle, int right) {
         k++;
     }
 
-	// przepisanie pozosta³ych elementów z tablic pomocniczych
+    // przepisanie pozosta³ych elementów z tablic pomocniczych
     while (i < leftSize) {
         tab[k] = leftTab[i];
         i++;
@@ -360,7 +403,7 @@ void merge(int** tab, int left, int middle, int right) {
         k++;
     }
 
-	// zwalnianie pamiêci
+    // zwalnianie pamiêci
     delete[] leftTab;
     delete[] rightTab;
 }
@@ -375,22 +418,22 @@ void mergeSort(int** tab, int left, int right) {
 }
 
 void verticesColoursLF(Vector* graph, int numberOfNodes) {
-	int** indexAndDegree = new int* [numberOfNodes];
-	for (int i = 0; i < numberOfNodes; i++) {
-		indexAndDegree[i] = new int[2];
-		indexAndDegree[i][0] = i;
-		indexAndDegree[i][1] = graph[i].size;
-	}
+    int** indexAndDegree = new int* [numberOfNodes];
+    for (int i = 0; i < numberOfNodes; i++) {
+        indexAndDegree[i] = new int[2];
+        indexAndDegree[i][0] = i;
+        indexAndDegree[i][1] = graph[i].size;
+    }
 
-	// sortowanie tablicy indexAndDegree w kolejnoœci malej¹cej przy pomocy merge sort
-	mergeSort(indexAndDegree, 0, numberOfNodes - 1);
-	
+    // sortowanie tablicy indexAndDegree w kolejnoœci malej¹cej przy pomocy merge sort
+    mergeSort(indexAndDegree, 0, numberOfNodes - 1);
+
     int* colours = new int[numberOfNodes];
     for (int i = 0; i < numberOfNodes; i++) {
         colours[i] = 0;
     }
 
-	// kolorowanie wierzcho³ków grafu posortowanego wed³ug stopni wierzcho³ków przypisuj¹c najmniejszy mo¿liwy kolor
+    // kolorowanie wierzcho³ków grafu posortowanego wed³ug stopni wierzcho³ków przypisuj¹c najmniejszy mo¿liwy kolor
     for (int i = 0; i < numberOfNodes; i++) {
         int x = indexAndDegree[i][0];
         if (colours[x] == 0) {
@@ -449,6 +492,7 @@ void complementsEdges(Vector* graph, int numberOfNodes) {
     printf("\n%lld", complementEdges);
 }
 
+// wczytywanie grafu i wywo³ywanie funkcji
 void inputGraph() {
     int numberOfNodes = 0;
     scanf("%d", &numberOfNodes);
@@ -460,7 +504,7 @@ void inputGraph() {
 
     for (int i = 0; i < numberOfNodes; i++) {
         scanf("%d", &numberOfNeighbours);
-        Vector neighbours;
+        Vector neighbours(numberOfNeighbours);
         for (int j = 0; j < numberOfNeighbours; j++) {
             scanf("%d", &neighbour);
             neighbours.push_back(neighbour);
