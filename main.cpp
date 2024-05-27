@@ -18,7 +18,7 @@ public:
         capacity = 1;
     }
 
-    Vector(int capacity) {
+    explicit Vector(int capacity) {
         size = 0;
         tab = new int[capacity + 1];
         this->capacity = capacity;
@@ -476,6 +476,31 @@ void verticesColoursSLF(Vector* graph, int numberOfNodes) {
 
 // liczba ró¿nych podgrafów C4
 // (liczba)
+/*bool DFS(Vector* graph, int node, int lastVisitedNode, int depth, int startNode, int& counter) {
+    if (depth == 4 && node == startNode) {
+        counter++;
+    }
+    if (depth == 4) {
+        return false;
+    }
+	for (int i = 0; i < graph[node].size; i++) {
+		int neighbour = graph[node].get(i) - 1;
+		if (neighbour != lastVisitedNode) {
+            if (DFS(graph, neighbour, node, depth + 1, startNode, counter)) {
+                return true;
+            }
+        }
+	}
+    return false;
+}
+
+void c4Subgraphs(Vector* graph, int numberOfNodes) {
+	int c4Subgraphs = 0;
+    for (int i = 0; i < numberOfNodes; i++) {
+        DFS(graph, i, -1, 0, i, c4Subgraphs);
+    }
+	printf("\n%d", c4Subgraphs / 4);
+}*/
 void c4Subgraphs(Vector* graph, int numberOfNodes) {
     printf("\n?");
 }
