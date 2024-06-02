@@ -174,7 +174,7 @@ void degreeSequence(Vector* graph, int numberOfNodes) {
     for (int i = 0; i < numberOfNodes; i++) {
         degree[i] = graph[i].size;
     }
-	quickSort(degree, numberOfNodes);
+    quickSort(degree, numberOfNodes);
     printf("\n");
     for (int i = numberOfNodes - 1; i >= 0; i--) {
         printf("%d ", degree[i]);
@@ -476,34 +476,55 @@ void verticesColoursSLF(Vector* graph, int numberOfNodes) {
 
 // liczba ró¿nych podgrafów C4
 // (liczba)
-/*bool DFS(Vector* graph, int node, int lastVisitedNode, int depth, int startNode, int& counter) {
-    if (depth == 4 && node == startNode) {
-        counter++;
-    }
-    if (depth == 4) {
-        return false;
-    }
-	for (int i = 0; i < graph[node].size; i++) {
-		int neighbour = graph[node].get(i) - 1;
-		if (neighbour != lastVisitedNode) {
-            if (DFS(graph, neighbour, node, depth + 1, startNode, counter)) {
-                return true;
+/*
+int c4DFS(Vector* graph, int startNode, int numberOfNodes) {
+    int number = 0;
+    Stack stack;
+    Stack depth;
+    Stack lastVisited;
+
+    stack.push(startNode);
+    depth.push(0);
+    lastVisited.push(-1);
+
+    while (!stack.isEmpty()) {
+        int node = stack.top();
+        int d = depth.top();
+        int last = lastVisited.top();
+
+        stack.pop();
+        depth.pop();
+        lastVisited.pop();
+
+        if (d == 4) {
+            if (node == startNode) {
+                number++;
+            }
+            continue;
+        }
+
+        for (int i = 0; i < graph[node].size; i++) {
+            int neighbour = graph[node].get(i) - 1;
+            if (neighbour != last && ((neighbour >= node && d == 1) || d != 1)) {
+                stack.push(neighbour);
+                depth.push(d + 1);
+                lastVisited.push(node);
             }
         }
-	}
-    return false;
-}
-
-void c4Subgraphs(Vector* graph, int numberOfNodes) {
-	int c4Subgraphs = 0;
-    for (int i = 0; i < numberOfNodes; i++) {
-        DFS(graph, i, -1, 0, i, c4Subgraphs);
     }
-	printf("\n%d", c4Subgraphs / 4);
-}*/
+
+    return number;
+}
+*/
 void c4Subgraphs(Vector* graph, int numberOfNodes) {
+    /*int c4Subgraphs = 0;
+    for (int i = 0; i < numberOfNodes; i++) {
+        c4Subgraphs += c4DFS(graph, i, numberOfNodes);
+    }
+    printf("\n%d", c4Subgraphs / 4);*/
     printf("\n?");
 }
+
 
 // liczba krawêdzi dope³nienia grafu
 // (liczba)
