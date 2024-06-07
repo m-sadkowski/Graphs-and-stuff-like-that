@@ -481,11 +481,11 @@ int c4DFS(Vector* graph, int startNode, int numberOfNodes) {
     int number = 0;
     Stack stack;
     Stack depth;
-    Stack lastVisited;
+        Stack lastVisited;
 
     stack.push(startNode);
     depth.push(0);
-    lastVisited.push(-1);
+        lastVisited.push(-1);
 
     while (!stack.isEmpty()) {
         int node = stack.top();
@@ -494,7 +494,7 @@ int c4DFS(Vector* graph, int startNode, int numberOfNodes) {
 
         stack.pop();
         depth.pop();
-        lastVisited.pop();
+                lastVisited.pop();
 
         if (d == 4) {
             if (node == startNode) {
@@ -508,7 +508,7 @@ int c4DFS(Vector* graph, int startNode, int numberOfNodes) {
             if (neighbour != last && ((neighbour >= node && d == 1) || d != 1)) {
                 stack.push(neighbour);
                 depth.push(d + 1);
-                lastVisited.push(node);
+                                lastVisited.push(node);
             }
         }
     }
@@ -521,7 +521,7 @@ void c4Subgraphs(Vector* graph, int numberOfNodes) {
     for (int i = 0; i < numberOfNodes; i++) {
         c4Subgraphs += c4DFS(graph, i, numberOfNodes);
     }
-    printf("\n%d", c4Subgraphs / 4);*/
+        printf("\n%d", c4Subgraphs / 4);*/
     printf("\n?");
 }
 
